@@ -97,7 +97,7 @@ Respondé SOLO con JSON válido, sin backticks ni texto extra. Incluí TODOS los
 {"titulo_carrusel":"...","estrategia":"...","slides":[{"numero":1,"tipo":"gancho","titulo":"...","texto":""},{"numero":2,"tipo":"contenido","titulo":"...","texto":"..."},{"numero":${total},"tipo":"cierre","titulo":"...","texto":""}],"caption":"...","hashtags":["rowinabags","carterasdecuero"]}`;
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
