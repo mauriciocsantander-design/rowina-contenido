@@ -106,7 +106,7 @@ Respondé SOLO con JSON válido, sin backticks ni texto extra. Incluí TODOS los
           "anthropic-dangerous-direct-browser-access": "true",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-sonnet-4-5",
           max_tokens: 1000,
           messages: [{ role: "user", content: prompt }],
         }),
