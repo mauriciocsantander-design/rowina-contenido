@@ -1,22 +1,28 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+export const config = { runtime: 'edge' };
+
+export default async function handler(req) {
+    if (req.method !== 'POST') {
+          return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+    }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.VITE_ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify(req.body),
-    });
+        const body = await req.json();
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                          'Content-Type': 'application/json',
+                          'x-api-key': process.env.VITE_ANTHROPIC_API_KEY,
+                          'anthropic-version': '2023-06-01',
+                },
+                body: JSON.stringify(body),
+        });
 
-    const data = await response.json();
-    res.status(response.status).json(data);
+      const data = await response.json();
+        return new Response(JSON.stringify(data), {
+                status: response.status,
+                headers: { 'Content-Type': 'application/json' },
+        });
   } catch (error) {
-    res.status(500).json({ error: 'Error calling Anthropic API' });
+        return new Response(JSON.stringify({ error: 'Error calling Anthropic API' }), { status: 500 });
   }
 }
