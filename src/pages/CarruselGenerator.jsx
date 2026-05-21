@@ -152,7 +152,10 @@ Respondé SOLO con JSON válido, sin backticks ni texto extra. Incluí TODOS los
   };
 
   const photoUrls = photos.map(f => URL.createObjectURL(f));
-  const photoOrder = selected.size > 0 ? [...selected] : photos.map((_, i) => i);
+  // Selected photos first, then the rest — no repetition
+  const selectedList = [...selected];
+  const unselectedList = photos.map((_, i) => i).filter(i => !selected.has(i));
+  const photoOrder = [...selectedList, ...unselectedList];
 
   // ─── STYLES ───────────────────────────────────────────────────────────────
   const s = {
@@ -389,7 +392,7 @@ Respondé SOLO con JSON válido, sin backticks ni texto extra. Incluí TODOS los
                 <div style={{ fontFamily: "Georgia, serif", fontSize: 17, fontWeight: 300, color: "#2c2118", marginBottom: 14 }}>Slides del carrusel</div>
                 <div style={s.slidesWrap}>
                   {(result.slides || []).map((slide, i) => {
-                    const pIdx = photoOrder[i % photoOrder.length];
+                    const pIdx = photoOrder[i < photoOrder.length ? i : photoOrder.length - 1];
                     const url = photoUrls[pIdx];
                     const typeLabel = slide.tipo === "gancho" ? "Gancho" : slide.tipo === "cierre" ? "Cierre" : `Punto ${slide.numero - 1}`;
                     return (
