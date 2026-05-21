@@ -102,6 +102,7 @@ export default function RowinaCarousel() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [copyModal, setCopyModal] = useState(null);
   const fileRef = useRef();
   const loadInterval = useRef();
 
@@ -201,10 +202,14 @@ Respondé SOLO con JSON válido, sin backticks ni texto extra. Incluí TODOS los
   };
 
   const copyText = (text, label) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(label);
-      setTimeout(() => setCopied(""), 2000);
-    });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(label);
+        setTimeout(() => setCopied(""), 2500);
+      }).catch(() => setCopyModal({ text, label }));
+    } else {
+      setCopyModal({ text, label });
+    }
   };
 
   const copyAll = () => {
@@ -399,6 +404,13 @@ Respondé SOLO con JSON válido, sin backticks ni texto extra. Incluí TODOS los
             {photos.length > 0 && photos.length < 3 && (
               <div style={{ ...s.alertBox, marginTop: 16 }}>Subí al menos 3 fotos para continuar.</div>
             )}
+            {photos.length >= 3 && (
+              <div style={{ marginTop: 12, fontSize: 12, color: "#8b6f4e", textAlign: "center" }}>
+                {photos.length < numSlides + 2
+                  ? `⚠️ Para ${numSlides + 2} slides sin repetir fotos, necesitás ${numSlides + 2} fotos. Tenés ${photos.length} — algunas se van a repetir.`
+                  : `✓ Tenés fotos suficientes para ${numSlides + 2} slides sin repetir.`}
+              </div>
+            )}
 
             {/* MODAL COMPARACIÓN */}
             {showComparison !== null && (
@@ -569,6 +581,46 @@ Respondé SOLO con JSON válido, sin backticks ni texto extra. Incluí TODOS los
           </div>
         )}
       </div>
+
+        {/* MODAL DE COPIA PARA MÓVIL */}
+        {copyModal && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 200, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+            <div style={{ background: "#f5f0e8", borderRadius: "16px 16px 0 0", padding: 24, width: "100%", maxWidth: 600, maxHeight: "80vh", overflow: "auto" }}>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: 16, color: "#2c2118", marginBottom: 12 }}>
+                Copiá el texto
+              </div>
+              <div style={{ fontSize: 12, color: "#8b6f4e", marginBottom: 12 }}>
+                Mantené apretado el texto de abajo y seleccioná todo para copiar.
+              </div>
+              <textarea
+                readOnly
+                value={copyModal.text}
+                style={{ width: "100%", minHeight: 140, padding: 12, background: "#fff", border: "1.5px solid #e8dcc8", borderRadius: 8, fontSize: 13, lineHeight: 1.6, color: "#1a1510", fontFamily: "'DM Sans', sans-serif", boxSizing: "border-box", resize: "none" }}
+                onFocus={e => e.target.select()}
+              />
+              <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+                <button
+                  style={{ flex: 1, padding: "12px", background: "#1a1510", color: "#f5f0e8", border: "none", borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(copyModal.text).then(() => {
+                      setCopied(copyModal.label);
+                      setTimeout(() => setCopied(""), 2500);
+                    }).catch(() => {});
+                    setCopyModal(null);
+                  }}
+                >
+                  Copiar
+                </button>
+                <button
+                  style={{ padding: "12px 20px", background: "transparent", color: "#8b6f4e", border: "1.5px solid #e8dcc8", borderRadius: 10, fontSize: 13, cursor: "pointer" }}
+                  onClick={() => setCopyModal(null)}
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   );
 }
